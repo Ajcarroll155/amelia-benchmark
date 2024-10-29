@@ -1,0 +1,50 @@
+services:
+  ################ VLLM ##################
+  # vllm:
+  #   image: vllm/vllm:latest
+  #   container_name: vllm
+  #   ports:
+  #     - "8000:8000"
+  #   shm_size: 18g
+  #   mem_limit: 18g
+  #   volumes:
+  #     - vllm-data:/root/.cache/huggingface
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   # restart:
+  #   command: --model meta-llama/Meta-Llama-3.1-8B --dtype half
+  #   environment:
+  #     - HUGGING_FACE_HUB_TOKEN
+  ##############################################
+  #docker run -d -e HF_TOKEN=$HF_TOKEN --network=host --device=/dev/kfd --device=/dev/dri --group-add=video --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v $HOME/.cache/huggingface:/root/.cache/huggingface --name vllm rocm-vllm:latest python3 -m vllm.entrypoints.openai.api_server --model meta-llama/Meta-Llama-3.1-8B-Instruct --port 8000
+  #python3 benchmark_serving.py --model meta-llama/Meta-Llama-3.1-8B-Instruct --port 8000 --dataset-name sharegpt --dataset-path ShareGPT_V3_unfiltered_cleaned_split.json --num-prompts 10 --request-rate 1
+  vllm:
+    build:
+      #DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm -t rocm-vllm .
+      context: rocm-vllm
+      dockerfile: Dockerfile.rocm
+      args:
+        - DOCKER_BUILDKIT=1
+    image: ${VLLM_IMAGE-rocm-vllm}
+    container_name: vllm
+    volumes:
+      - /data/huggingface:/root/.cache/huggingface
+    environment:
+      - HF_TOKEN=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
+      - HIP_VISIBLE_DEVICES
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+    ports:
+      - ${VLLM_PORT-8000}:8000
+    ipc: host
+    security_opt:
+      - seccomp:unconfined
+    command: python -m vllm.entrypoints.openai.api_server --model ${MODEL-meta-llama/Meta-Llama-3.1-70B-Instruct} --api-key ${API_KEY-token-abc123}
