@@ -184,7 +184,7 @@ class Agent:
         return compression_retriever
 
 
-    def get_response(self, query, chat_history):
+    def get_response(self, query, chat_history=[]):
         inputs = {"question": query, "chat_history": chat_history}
         self.chat_history = chat_history
         

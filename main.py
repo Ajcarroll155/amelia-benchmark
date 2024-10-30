@@ -3,6 +3,7 @@ from agents.langgraph_agent import Agent
 from langchain_core.language_models.llms import BaseLLM
 from dotenv import load_dotenv
 from pathlib import Path
+from send_input import LoadGenerator
 
 MODEL_REPO = "NousResearch/Meta-Llama-3-70B-Instruct"
 load_dotenv()
@@ -46,6 +47,28 @@ def init_langgraph(file_path, llm) -> BaseLLM:
         return agent
 
 
+dataset = LoadGenerator.load_dataset()
+
+'''
+for item in dataset:
+     print(f'Path: {item[0]}, Query: {item[1]}')
+'''
+llm = init_vllm()
+
+i = 1
+data_length = len(dataset)
+for item in dataset:
+    print(f'ITEM {i} OF {data_length}')
+    file_path = item[0]
+    query = item[1]
+
+    agent = init_langgraph(llm=llm, file_path=file_path)
+    response = agent.get_response(query)
+    generation = response['generation']
+
+    print(f'File Path: {file_path}\nQuestion: {query}\nAnswer: {generation}\n')
+    i+=1
+'''
 print('-----PIPELINE TEST-----')
 while (True):
     print('NEW QUERY\n')
@@ -65,3 +88,4 @@ while (True):
 
     print(f'Response: {generation}\n\n')
     break
+'''
