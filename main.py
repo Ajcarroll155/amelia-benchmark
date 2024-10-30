@@ -3,7 +3,7 @@ from agents.langgraph_agent import Agent
 from langchain_core.language_models.llms import BaseLLM
 from dotenv import load_dotenv
 
-MODEL_REPO = "NousResearch/Meta-Llama-3-8B-Instruct"
+MODEL_REPO = "NousResearch/Meta-Llama-3-70B-Instruct"
 load_dotenv()
 def init_vllm(model=MODEL_REPO) -> BaseLLM:
     """
