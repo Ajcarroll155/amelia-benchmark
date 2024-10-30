@@ -2,6 +2,7 @@ from langchain_community.llms.vllm import VLLMOpenAI
 from agents.langgraph_agent import Agent
 from langchain_core.language_models.llms import BaseLLM
 from dotenv import load_dotenv
+from pathlib import Path
 
 MODEL_REPO = "NousResearch/Meta-Llama-3-70B-Instruct"
 load_dotenv()
@@ -48,8 +49,10 @@ def init_langgraph(file_path, llm) -> BaseLLM:
 print('-----PIPELINE TEST-----')
 while (True):
     print('NEW QUERY\n')
-    file_path = input('Path to Input File:')
-    query = input('File Query:')
+    #file_path = input('Path to Input File:')
+    file_path = '/home/acaroll/amelia-benchmark/input_dir/WWII_SHORT.pdf'
+    #query = input('File Query:')
+    query = 'When did the war begin?'
 
     llm = init_vllm()
     agent = init_langgraph(llm=llm, file_path=file_path)
@@ -61,3 +64,4 @@ while (True):
     history.append(f'Assistant: {generation}')
 
     print(f'Response: {generation}\n\n')
+    break

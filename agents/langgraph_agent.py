@@ -15,6 +15,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from flashrank import Ranker
+from pathlib import Path
 
 class AgentState(TypedDict):
     """
@@ -73,6 +74,7 @@ class Agent:
         )
         
         if self.file_ext == 'pdf':
+            print(Path.cwd())
             docs = PyPDFLoader(file_path=self.file_path).load()
             chunks = self.text_splitter.split_documents(docs)
 
