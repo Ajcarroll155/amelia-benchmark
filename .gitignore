@@ -1,4 +1,4 @@
 .env
 benchmark_env/
 __pycache__/
-datasets/*
+*datasets/*
