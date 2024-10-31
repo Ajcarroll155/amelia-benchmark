@@ -1,14 +1,18 @@
+
 MODEL="NousResearch/Meta-Llama-3-70B-Instruct"
 API_KEY="token-abc123"
 CONTAINER_NAME="vllm-amelia"
-CACHE_DIR="/mnt/data-share/acaroll"
 
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm -t vllm-rocm .
+# Mounted Cache Directory: Replace with desired model cache location
+CACHE_DIR="/mnt/data-share/acaroll" 
 
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm -t vllm-rocm . # Build the latest vLLM ROCm image
+
+# Run the vLLM container
 docker run -it \
     --network=host \
     --group-add=video \
-    -p= 8000:8000 \
+    -p 8000:8000 \
     --ipc=host \
     --cap-add=SYS_PTRACE \
     --security-opt seccomp=unconfined \
