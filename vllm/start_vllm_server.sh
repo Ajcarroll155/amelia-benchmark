@@ -6,6 +6,8 @@ CONTAINER_NAME="vllm-amelia"
 # Mounted Cache Directory: Replace with desired model cache location
 CACHE_DIR="/mnt/data-share/acaroll" 
 
+cd /../../vllm
+
 DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm -t vllm-rocm . # Build the latest vLLM ROCm image
 
 # Run the vLLM container
