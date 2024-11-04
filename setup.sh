@@ -51,7 +51,7 @@ echo "
 Creating virtual environment at amelia-benchmark/benchmark_env..."
 python -m venv benchmark_env
 source ./benchmark_env/bin/activate
-echo "Installing requirements..."
+echo "Installing dependencies..."
 pip install -r requirements.txt
 
 # Download datasets
