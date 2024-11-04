@@ -1,4 +1,7 @@
 #!/bin/bash
+DATASET_DIR="./datasets"
+RAG_URL="https://huggingface.co/datasets/glaiveai/RAG-v1/resolve/main/glaive_rag_v1.json"
+
 
 source .env
 
@@ -50,6 +53,12 @@ python -m venv benchmark_env
 source ./benchmark_env/bin/activate
 echo "Installing requirements..."
 pip install -r requirements.txt
+
+# Download datasets
+mkdir datasets
+echo "
+Downloading RAG Q&A dataset..."
+curl -o "$DATASET_DIR/glaive_rag_v1.json" "$RAG_URL"
 
 # Set up Docker container
 echo "
