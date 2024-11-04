@@ -1,0 +1,27 @@
+
+services:
+  vllm-rocm-amelia:
+    image: vllm-rocm-amelia
+    working_dir: /workspace
+    container_name: ${CONTAINER_NAME}
+    network_mode: host
+    group_add:
+      - video
+    ipc: host
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    volumes:
+      - ${CACHE_DIR}:/root/.cache
+      - ./:/workspace/amelia-benchmark
+      - ${MOUNT_RPD:+./../rocmProfileData:/workspace/rocmProfileData}
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL=${MODEL}
+      - API_KEY=${API_KEY}
+    command: python3 -m vllm.entrypoints.openai.api_server --model ${MODEL} --api-key ${API_KEY} --port 8000
