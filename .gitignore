@@ -2,3 +2,4 @@
 benchmark_env/
 __pycache__/
 datasets/
+trace.*
