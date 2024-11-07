@@ -25,10 +25,8 @@ read use_tracing
 if [ "$use_tracing" = "y" ] || [ "$use_tracing" = "Y" ]; then
     export MOUNT_RPD=1
     echo "Cloning rocmProfileData..."
-    cd ..
     # Clone rocmProfileData repository
     git clone https://github.com/ROCm/rocmProfileData.git
-    cd amelia-benchmark
 fi
 cd ..
 
@@ -46,13 +44,6 @@ echo "DONE"
 
 cd ..
 cd amelia-benchmark
-# Create dev environment
-echo "
-Creating virtual environment at amelia-benchmark/benchmark_env..."
-python -m venv benchmark_env
-source ./benchmark_env/bin/activate
-echo "Installing dependencies..."
-pip install -r requirements.txt
 
 # Download datasets
 mkdir datasets
@@ -63,19 +54,6 @@ curl -o "$DATASET_DIR/glaive_rag_v1.json" "$RAG_URL"
 # Set up Docker container
 echo "
 Creating project container..."
-docker compose up -d .
-
-# apt packages if using RPD
-if [ "$use_tracing" = "y" ] || [ "$use_tracing" = "Y" ]; then
-    echo "Installing dependencies for RPD..."
-    docker compose exec vllm-rocm-amelia apt update
-    docker compose exec vllm-rocm-amelia apt install sqlite3 libsqlite3-dev
-    docker compose exec vllm-rocm-amelia apt install libfmt-dev
-    docker compose exec vllm-rocm-amelia sh -c "cd rocmProfileData"
-    echo "Installing tracers..."
-    docker compose exec vllm-rocm-amelia sh -c "make && make install"
-fi
-echo "SETUP COMPLETE"
-docker compose exec -it vllm-rocm-amelia sh -c "cd .."
+docker compose up -d 
 
 exit 0

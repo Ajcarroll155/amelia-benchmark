@@ -1,0 +1,18 @@
+1. Create file called '.env' from example.env
+    - Set CACHE_DIR = your model location
+    - Set MODEL = NousResearch/Meta-Llama-3-70B-Instruct
+    - Set API_KEY = token-abc123
+
+2. Run setup_container.sh
+    - Input y when prompted to include RPD
+    - This should open the container terminal in your current terminal window
+
+3. [IN CONTAINER TERMINAL] Run install_env.sh
+
+4. [IN CONTAINER TERMINAL] To start the vLLM server, use the following command:
+
+    python3 -m vllm.entrypoints.openai.api_server --model NousResearch/Meta-Llama-3-70B-Instruct --api-key token-abc123 --port 8000
+
+5. [IN CONTAINER TERMINAL] To run the pipeline test:
+    - WITH RPD TRACING: bash run_rpd.sh
+    - WITHOUT: python3 main.py

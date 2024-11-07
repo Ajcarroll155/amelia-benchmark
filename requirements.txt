@@ -143,8 +143,6 @@ tenacity==8.5.0
 threadpoolctl==3.5.0
 tokenizers==0.20.1
 tomli==2.0.2
-torch==2.5.0
-torchvision==0.20.0
 tqdm==4.66.5
 transformers==4.45.2
 triton==3.1.0
