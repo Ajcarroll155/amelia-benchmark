@@ -28,22 +28,27 @@ if [ "$use_tracing" = "y" ] || [ "$use_tracing" = "Y" ]; then
     # Clone rocmProfileData repository
     git clone https://github.com/ROCm/rocmProfileData.git
 fi
-cd ..
 
-# Download vLLM
-echo "
-Setting up vLLM..."
-git clone https://github.com/vllm-project/vllm
-cd vllm
+# Check for vLLM image
+if docker image inspect vllm-rocm-amelia >/dev/null 2>&1; then
+    echo "vllm-rocm-amelia image already present, skipping build..."
+else
+    cd ..
+    echo "vllm-rocm-amelia image not present"
+    # Download vLLM
+    echo "
+    Setting up vLLM..."
+    git clone https://github.com/vllm-project/vllm
+    cd vllm
 
-# Build vLLM ROCm image (This may take some time)
-echo "
-Building vLLM ROCm image..."
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm --build-arg BASE_IMAGE="rocm/pytorch:rocm6.2.3_ubuntu22.04_py3.10_pytorch_release_2.3.0" -t vllm-rocm-amelia .
-echo "DONE"
-
-cd ..
-cd amelia-benchmark
+    # Build vLLM ROCm image (This may take some time)
+    echo "
+    Building vLLM ROCm image..."
+    DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm --build-arg BASE_IMAGE="rocm/pytorch:rocm6.2.3_ubuntu22.04_py3.10_pytorch_release_2.3.0" -t vllm-rocm-amelia .
+    echo "DONE"
+    cd ..
+    cd amelia-benchmark
+fi
 
 # Download datasets
 mkdir datasets
@@ -55,5 +60,7 @@ curl -o "$DATASET_DIR/glaive_rag_v1.json" "$RAG_URL"
 echo "
 Creating project container..."
 docker compose up -d 
+
+docker compose exec -it vllm-rocm-amelia bash
 
 exit 0
