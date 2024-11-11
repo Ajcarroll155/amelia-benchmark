@@ -14,3 +14,4 @@ echo "
 Installing dependencies for Amelia..."
 pip install -r requirements.txt
 pip install langchain-community
+pip uninstall apex

@@ -33,7 +33,7 @@ class Agent:
     """
     LangGraph agent integrates multiple agents into an LLM pipeline.
     """
-    def __init__(self, llm: BaseLLM, file_path: str, chat_history: list = []) -> None:
+    def __init__(self, llm: BaseLLM, file_path: str='', chat_history: list = []) -> None:
         """
         Initialize agent with llm, retriever, chat history and creates langgraph.
 
@@ -57,7 +57,6 @@ class Agent:
                 else:
                     self.csv_files.append(metadata['path'])
         '''
-        self.file_ext = file_path.split('.')[-1]
         db_dir = "./knowledgebase/vectorstore"
         # Get retriever
 
@@ -72,23 +71,9 @@ class Agent:
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1024, chunk_overlap=100
         )
-        
-        if self.file_ext == 'pdf':
-            print(Path.cwd())
-            docs = PyPDFLoader(file_path=self.file_path).load()
-            chunks = self.text_splitter.split_documents(docs)
 
-            vector_store = Chroma.from_documents(
-                documents=chunks,
-                embedding=HuggingFaceInstructEmbeddings(model_name='hkunlp/instructor-xl')
-            )
-            self.retriever = vector_store.as_retriever(
-                search_type = "similarity_score_threshold",
-                search_kwargs={"k": 3, "score_threshold": 0.5, },
-            )
-
-        
-    
+        if file_path != '':
+            self.embed_document(file_path)
 
         # List CSV agent in active nodes
         self.active_nodes["csv_node"] = CSVAgent._description()
@@ -125,6 +110,23 @@ class Agent:
         self.graph.add_edge("rag_node", "final_response")
         self.graph.add_edge("final_response", END)
         self.agent = self.graph.compile()
+
+    def embed_document(self, file_path):
+        self.file_ext = file_path.split('.')[-1]
+        self.file_path = file_path
+        if self.file_ext == 'pdf':
+            print(Path.cwd())
+            docs = PyPDFLoader(file_path=self.file_path).load()
+            chunks = self.text_splitter.split_documents(docs)
+
+            vector_store = Chroma.from_documents(
+                documents=chunks,
+                embedding=HuggingFaceInstructEmbeddings(model_name='hkunlp/instructor-xl')
+            )
+            self.retriever = vector_store.as_retriever(
+                search_type = "similarity_score_threshold",
+                search_kwargs={"k": 3, "score_threshold": 0.5, },
+            )
 
     def file_type(self, state):
         """
