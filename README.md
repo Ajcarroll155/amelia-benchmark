@@ -48,14 +48,15 @@ See [AMELIA-README.md](https://github.com/Ajcarroll155/amelia-benchmark/blob/mai
    MODEL=NousResearch/Meta-Llama-3-70B-Instruct
    API_KEY=your-openai-api-key
    DATASET_DIR=./datasets
-   RAG_URL=https://huggingface.co/datasets/glaiveai/RAG-v1/resolve/main/glaive_rag_v1.json
+   RAG_URL=[link to rag dataset]
    ```
 
 ### Quick Start
-**Run setup script**:
+**Setup Container**:
+
    In the amelia-benchmark directory:
    ```bash
-   bash setup.sh
+   bash setup_container.sh
    ```
    The script will prompt you to include the rocmProfileData repository for tracing:
    ```bash
@@ -65,11 +66,38 @@ See [AMELIA-README.md](https://github.com/Ajcarroll155/amelia-benchmark/blob/mai
    
    Running setup.sh accomplishes the following:
    - Install and set-up vLLM ROCm image
-   - Install the rocmProfileData tracers (optional)
-   - Creates virtual environment for development and installs dependencies
+   - Download the rocmProfileData tracers (optional)
    - Downloads benchmarking datasets
    - Builds vllm-rocm-amelia container via docker compose
    - Opens vllm-rocm-amelia bash session in current terminal window
+
+**Troubleshooting**:
+   - RAG dataset download fails: If the RAG dataset JSON file contains only a URL, you can alternatively download the dataset from the link in step 6 of manual installation, and place it in the ```datasets``` directory
+   - Bash session not opened after execution: To manually open a container bash session in the current terminal window, use the command:
+     ```bash
+     docker compose exec -it vllm-rocm-amelia bash
+     ```
+
+**Install Dependencies**
+
+Once the container is running with a terminal window attached, run the ```install_env``` script:
+```bash
+bash install_env.sh
+```
+This script accomplishes the following:
+- Installs APT dependencies for rocmProfileData
+- Builds the RPD tracers
+- Installs project dependencies for the Amelia pipeline
+
+***Note***: Containers build with docker compose can be stopped in two different ways.
+- ```docker compose down``` will completely dismantle the container removing installed dependencies. This will require the following commands to restart the container:
+  ```bash
+  docker compose up -d
+  docker compose exec -it vllm-rocm-amelia bash
+  bash install_env.sh
+  ```
+- ```docker compose stop vllm-rocm-amelia``` will only stop the container, and it can then be restarted using
+  ```docker compose start vllm-rocm-amelia```
 
 ### Manual Installation
     
@@ -86,6 +114,7 @@ See [AMELIA-README.md](https://github.com/Ajcarroll155/amelia-benchmark/blob/mai
    ```
    - To include RPD tracing tools:
    ```bash
+   cd amelia-benchmark
    git clone https://github.com/ROCm/rocmProfileData.git
    ```
 4. **Build vLLM image**
@@ -98,23 +127,9 @@ See [AMELIA-README.md](https://github.com/Ajcarroll155/amelia-benchmark/blob/mai
    ```bash
    DOCKER_BUILDKIT=1 docker build -f Dockerfile.rocm --build-arg BASE_IMAGE="rocm/pytorch:rocm6.2.3_ubuntu22.04_py3.10_pytorch_release_2.3.0" -t vllm-rocm-amelia .
    ```
-   This process will take some time.
-5. **Create Python virtual environment**
-
-   Navigate to the amelia-benchmark directory and create the python virtual environment:
-   ```bash
-   cd ../amelia-benchmark
-   python -m venv benchmark_env
-   ```
-   Activate the environment:
-   ```bash
-   source ./benchmark_env/bin/activate
-   ```
-   Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-6. **Download Benchmarking Datasets**
+   This process will take some time, and can be skipped if the image 'vllm-rocm-amelia' is already present on the system.
+   
+5. **Download Benchmarking Datasets**
 
    Create datasets directory:
    ```bash
@@ -128,27 +143,15 @@ See [AMELIA-README.md](https://github.com/Ajcarroll155/amelia-benchmark/blob/mai
      ```bash
      curl -o "./glaive_rag_v1.json" "$RAG_URL"
      ```
-7. **Create Docker container**
+6. **Create Docker container**
 
    Navigate to the amelia-benchmark directory and build the container from docker-compose:
    ```bash
-   docker compose up -d .
+   docker compose up -d
    ```
-   If you are including RPD tracing, set the variable MOUNT_RPD=1 during execution:
-   ```bash
-   MOUNT_RPD=1 docker compose up -d .
-   ```
-   The docker compose command will automatically create the vllm-rocm-amelia container and start a vLLM server hosting the supplied model.
+   The docker compose command will automatically create the vllm-rocm-amelia container and start a bash session in the current terminal window.
 
-   To verify the container has been created and the necessary volumes mounted, start a bash session in the container and view the working directory:
-   ```bash
-   docker compose exec -it vllm-rocm-amelia sh -c "dir"
-   ```
-   If setup correctly, the working directory ```workspace``` should include the following:
-   - ```amelia-benchmark/```
-   - ```rocmProfileData/``` (If including tracing functionality)
-
-9. **Setup tracing functionality (Optional)**
+7. **Setup tracing functionality (Optional)**
 
    If the container was built including the rocmProfileData directory, the following steps will install the RPD tracing tools:
    - Update/Install apt packages
@@ -162,15 +165,28 @@ See [AMELIA-README.md](https://github.com/Ajcarroll155/amelia-benchmark/blob/mai
      cd rocmProfileData
      make; make install
      ```
+     
+8. **Install pipeline dependencies**
+   Navigate to the ```amelia-benchmark``` directory and run the following:
+   ```bash
+   pip install -r requirements.txt
+   pip install langchain_community
+   pip uninstall apex
+   ```
 
 ## Running the Pipeline
 
-Before running the pipeline, make sure the virtual environment is active:
+Before running the pipeline, make sure the vLLM server is active:
 ```bash
-cd amelia-benchmark
-source ./benchmark_env/bin/activate
+python3 -m vllm.entrypoints.openai.api_server --model NousResearch/Meta-Llama-3-70B-Instruct --api-key token-abc123 --port 8000
 ```
+
 Execution of the Amelia pipeline is handled in ```amelia-benchmark/main.py```.
+
+Open a new terminal session inside the container:
+```bash
+docker exec -it vllm-rocm-amelia bash
+```
 
 Running the command ```python main.py``` will execute a basic pipeline test using the RAG dataset, uploading a document and responding to a query for *n* iterations.
 

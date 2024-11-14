@@ -27,7 +27,7 @@ def init_vllm(model=MODEL_REPO) -> BaseLLM:
     )
     return llm 
 
-def init_langgraph(file_path, llm) -> BaseLLM:
+def init_langgraph(llm, file_path='') -> BaseLLM:
         """
         Function initializes langgraph agent. 
 
@@ -54,7 +54,7 @@ for item in dataset:
      print(f'Path: {item[0]}, Query: {item[1]}')
 '''
 llm = init_vllm()
-
+agent = init_langgraph(llm=llm)
 i = 1
 data_length = len(dataset)
 for item in dataset:
@@ -62,7 +62,7 @@ for item in dataset:
     file_path = item[0]
     query = item[1]
 
-    agent = init_langgraph(llm=llm, file_path=file_path)
+    agent.embed_document(file_path)
     response = agent.get_response(query)
     generation = response['generation']
 
