@@ -4,8 +4,20 @@ from langchain_core.language_models.llms import BaseLLM
 from dotenv import load_dotenv
 from pathlib import Path
 from send_input import LoadGenerator
+import sys
 
 MODEL_REPO = "NousResearch/Meta-Llama-3-70B-Instruct"
+ARG_ERROR_MSG = '''
+ERROR: Invalid input arguments
+
+Be sure to provide the desired use case AND number of datapoints in the function call.
+USE CASES:
+    PDF Q&A: PDF
+    CSV Q&A: CSV
+Use the following command:
+python3 main.py [USE CASE] [NUMBER OF DATAPOINTS]
+'''
+
 load_dotenv()
 def init_vllm(model=MODEL_REPO) -> BaseLLM:
     """
@@ -46,46 +58,37 @@ def init_langgraph(llm, file_path='') -> BaseLLM:
 
         return agent
 
-
-dataset = LoadGenerator.load_dataset(50)
-
-'''
-for item in dataset:
-     print(f'Path: {item[0]}, Query: {item[1]}')
-'''
-llm = init_vllm()
-agent = init_langgraph(llm=llm)
-i = 1
-data_length = len(dataset)
-for item in dataset:
-    print(f'ITEM {i} OF {data_length}')
-    file_path = item[0]
-    query = item[1]
-
-    agent.embed_document(file_path)
-    response = agent.get_response(query)
-    generation = response['generation']
-
-    print(f'File Path: {file_path}\nQuestion: {query}\nAnswer: {generation}\n')
-    i+=1
-'''
-print('-----PIPELINE TEST-----')
-while (True):
-    print('NEW QUERY\n')
-    #file_path = input('Path to Input File:')
-    file_path = '/home/acaroll/amelia-benchmark/input_dir/WWII_SHORT.pdf'
-    #query = input('File Query:')
-    query = 'When did the war begin?'
-
+def main():
+    try:
+        args = sys.argv()
+        useCase = args[0]
+        numPoints = args[1]
+    except:
+         print(ARG_ERROR_MSG)
+         return
+    
+    print(f'Preparing Benchmark Dataset:\nUse Case: {useCase} | Datapoints: {numPoints}')
+         
+    dataset = LoadGenerator.load_dataset(useCase, numPoints)
     llm = init_vllm()
-    agent = init_langgraph(llm=llm, file_path=file_path)
-    history = [f'User: {query}']
+    agent = init_langgraph(llm=llm)
+    i = 1
+    data_length = len(dataset)
+    for item in dataset:
+        print(f'ITEM {i} OF {data_length}')
 
-    response = agent.get_response(query, history)
-    generation = response['generation']
+        file_path = item[0]
+        print(f'File Path: {file_path}')
+        agent.embed_document(file_path)
 
-    history.append(f'Assistant: {generation}')
+        t_output = f'File Path: {file_path}\n'
+        queries = item[1:]
+        for query in queries:
+            response = agent.get_response(query)
+            generation = response['generation']
+            t_output += f'{query} ---> {generation}\n'
+        print(t_output)
+        i+=1
 
-    print(f'Response: {generation}\n\n')
-    break
-'''
+if __name__=='__main__':
+     main()
