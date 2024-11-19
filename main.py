@@ -47,7 +47,7 @@ def init_langgraph(llm, file_path='') -> BaseLLM:
         return agent
 
 
-dataset = LoadGenerator.load_dataset(5)
+dataset = LoadGenerator.load_dataset(50)
 
 '''
 for item in dataset:

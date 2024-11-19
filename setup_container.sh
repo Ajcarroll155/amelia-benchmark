@@ -51,7 +51,6 @@ else
 fi
 
 # Download datasets
-mkdir datasets
 echo "
 Downloading RAG Q&A dataset..."
 curl -o "$DATASET_DIR/glaive_rag_v1.json" "$RAG_URL"

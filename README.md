@@ -130,12 +130,6 @@ This script accomplishes the following:
    This process will take some time, and can be skipped if the image 'vllm-rocm-amelia' is already present on the system.
    
 5. **Download Benchmarking Datasets**
-
-   Create datasets directory:
-   ```bash
-   mkdir datasets
-   cd datasets
-   ```
    
    Download desired datasets:
    - RAG Q&A:

@@ -1,6 +1,7 @@
 .env
 benchmark_env/
 __pycache__/
-datasets/
 trace.*
 rocmProfileData/
+glaive_rag_v1.json
+tempfiles/
