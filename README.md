@@ -182,12 +182,13 @@ Open a new terminal session inside the container:
 docker exec -it vllm-rocm-amelia bash
 ```
 
-Running the command ```python main.py``` will execute a basic pipeline test using the RAG dataset, uploading a document and responding to a query for *n* iterations.
-
-On line **50** of ```main.py```, specify *n* to determine number of uploads/queries used in the test run.
-```python
-dataset = LoadGenerator.load_dataset(n)
+```main.py``` requires two input arguments, ```USE_CASE``` and ```NUM_DATAPOINTS```:
+```bash
+python main.py [USE_CASE] [NUM_DATAPOINTS]
 ```
+Use Cases:
+- RAG Q&A via PDF upload: ```PDF```
+- Data analysis Q&A via CSV upload: ```CSV```
 
 ### Tracing pipeline execution
 
